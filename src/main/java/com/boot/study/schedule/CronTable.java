@@ -1,5 +1,8 @@
 package com.boot.study.schedule;
 
+import com.boot.study.service.CompanyService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -15,12 +18,16 @@ import java.time.LocalDate;
 import java.util.Date;
 
 @Component
+@RequiredArgsConstructor
 public class CronTable {
-
-    private final String businessDetailsUrl = "http://api.odcloud.kr/api/15083277/v1/uddi:84b05020-c26e-4a57-9a15-c60554764534";
-
     @Value("${serviceKey}")
     private String encodingServiceKey;
+    private final String businessDetailsUrl = "http://api.odcloud.kr/api/15083277/v1/uddi:84b05020-c26e-4a57-9a15-c60554764534";
+
+    private final CompanyService companyService;
+
+
+    private int count = 0;
 
     @Scheduled(cron = "0 0 17 * * ?") // 매일 17시 마다.
     public void seventeenHours() {
@@ -31,11 +38,13 @@ public class CronTable {
     // 애플리케이션 시작 후 3초 후에 첫 실행, 그 후 매 20초마다 주기적으로 실행한다.
     @Scheduled(initialDelay = 3000, fixedDelay = 20000)
     public void otherJob() {
+        count++;
+        System.out.println("count = " + count);
         StringBuilder urlBuilder = new StringBuilder(businessDetailsUrl); /*URL*/
         try {
             // 파라미터 생성
             urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + "=" + encodingServiceKey);
-            urlBuilder.append("&" + URLEncoder.encode("page", "UTF-8") +"=1");
+            urlBuilder.append("&" + URLEncoder.encode("page", "UTF-8") +"=" + count);
             urlBuilder.append("&" + URLEncoder.encode("perPage", "UTF-8") + "=10");
             System.out.println("urlBuilder = " + urlBuilder);
             // URL 객체 생성
@@ -61,6 +70,7 @@ public class CronTable {
             while ((line = rd.readLine()) != null) {
                 sb.append(line);
             }
+            companyService.insertData(sb.toString());
             // 10. 객체 해제.
             rd.close();
             conn.disconnect();
