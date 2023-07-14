@@ -1,7 +1,7 @@
 package com.boot.study.service;
 
 import com.boot.study.entity.Company;
-import com.boot.study.repostitory.CompanyRepository;
+import com.boot.study.mapper.CompanyMapper;
 import com.mysql.cj.xdevapi.JsonArray;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
@@ -17,7 +17,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CompanyServiceImpl implements CompanyService {
 
-    private final CompanyRepository companyRepository;
+    private final CompanyMapper companyMapper;
 
     @Override
     public Integer insertData(String data) {
@@ -52,8 +52,12 @@ public class CompanyServiceImpl implements CompanyService {
                     .numberOfLostSubscribers(numberOfLostSubscribers)
                     .numberOfNewAcquirers(numberOfNewAcquirers)
                     .build();
-            companyRepository.save(company);
+//            companyMapper.save(company);
         }
+        String now = companyMapper.getCurrentDateTime();
+        List<Company> companies = companyMapper.selectAll();
+        System.out.println("now = " + now);
+        System.out.println("companies = " + companies);
         return null;
     }
 }
